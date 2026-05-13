@@ -23,6 +23,9 @@ class RunConfig:
     seed: int = 42
     run_niah: bool = True
     run_multi_needle: bool = True
+    needle_text: str | None = None
+    needle_question: str | None = None
+    needle_expected: str | None = None
 
 
 def run(adapter: ModelAdapter, cfg: RunConfig) -> list[NeedleResult]:
@@ -48,11 +51,18 @@ def run(adapter: ModelAdapter, cfg: RunConfig) -> list[NeedleResult]:
     all_results: list[NeedleResult] = []
 
     if cfg.run_niah:
-        niah_cfg = NeedleConfig(
-            depths=cfg.depths,
-            samples_per_depth=cfg.samples_per_depth,
-            target_tokens=cfg.target_tokens,
-        )
+        niah_kwargs: dict = {
+            "depths": cfg.depths,
+            "samples_per_depth": cfg.samples_per_depth,
+            "target_tokens": cfg.target_tokens,
+        }
+        if cfg.needle_text is not None:
+            niah_kwargs["needle_text"] = cfg.needle_text
+        if cfg.needle_question is not None:
+            niah_kwargs["question"] = cfg.needle_question
+        if cfg.needle_expected is not None:
+            niah_kwargs["expected"] = cfg.needle_expected
+        niah_cfg = NeedleConfig(**niah_kwargs)
         all_results.extend(
             run_niah(adapter, chunks, niah_cfg, seed=cfg.seed, on_result=persist)
         )

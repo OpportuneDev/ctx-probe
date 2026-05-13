@@ -55,6 +55,36 @@ def test_runner_jsonl_appended_in_order(sample_corpus_path, mock_adapter, tmp_pa
     assert all(r["probe"] == "niah" for r in lines)
 
 
+def test_runner_uses_custom_needle(sample_corpus_path, tmp_path):
+    from tests.conftest import MockAdapter
+
+    captured = []
+
+    def answer(prefix, q):
+        captured.append({"prefix": prefix, "q": q})
+        return "The value is 2.3 mg/dL."
+
+    adapter = MockAdapter(answer_fn=answer)
+    cfg = RunConfig(
+        model="mock",
+        corpus_path=sample_corpus_path,
+        out_dir=str(tmp_path / "out"),
+        target_tokens=1500,
+        depths=[0.5],
+        needle_counts=[],
+        samples_per_depth=1,
+        run_multi_needle=False,
+        needle_text="Protocol SI-2026-NEPHRO-742 sets the creatinine threshold at 2.3 mg/dL.",
+        needle_question="What is the creatinine threshold in protocol SI-2026-NEPHRO-742?",
+        needle_expected="2.3",
+    )
+    results = run(adapter, cfg)
+    assert len(results) == 1
+    assert results[0].correct is True
+    assert "SI-2026-NEPHRO-742" in captured[0]["prefix"]
+    assert "SI-2026-NEPHRO-742" in captured[0]["q"]
+
+
 def test_runner_skip_flags(sample_corpus_path, mock_adapter, tmp_path):
     cfg = RunConfig(
         model="mock",

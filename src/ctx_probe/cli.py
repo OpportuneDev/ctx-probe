@@ -76,6 +76,22 @@ def main():
 @click.option(
     "--skip-multi-needle", is_flag=True, help="Skip the multi-needle MRCR-style probe."
 )
+@click.option(
+    "--needle-text",
+    default=None,
+    help="Custom NIAH needle to inject into the haystack. "
+    "Must be a fact the model cannot know from training (e.g. fictional ID + value).",
+)
+@click.option(
+    "--needle-question",
+    default=None,
+    help="Question to ask the model about the needle.",
+)
+@click.option(
+    "--needle-expected",
+    default=None,
+    help="Expected substring in the model's answer (case-insensitive).",
+)
 def run_cmd(
     model,
     corpus_path,
@@ -87,8 +103,20 @@ def run_cmd(
     seed,
     skip_niah,
     skip_multi_needle,
+    needle_text,
+    needle_question,
+    needle_expected,
 ):
     """Run probes against a model and write an HTML report."""
+    custom_needle_flags = [needle_text, needle_question, needle_expected]
+    if any(f is not None for f in custom_needle_flags) and not all(
+        f is not None for f in custom_needle_flags
+    ):
+        raise click.UsageError(
+            "When overriding the needle, all three of --needle-text, "
+            "--needle-question, --needle-expected must be provided together."
+        )
+
     cfg = RunConfig(
         model=model,
         corpus_path=str(corpus_path),
@@ -100,6 +128,9 @@ def run_cmd(
         seed=seed,
         run_niah=not skip_niah,
         run_multi_needle=not skip_multi_needle and bool(needle_counts),
+        needle_text=needle_text,
+        needle_question=needle_question,
+        needle_expected=needle_expected,
     )
 
     adapter = build_adapter(model)
