@@ -13,3 +13,6 @@ venv/
 *.log
 out/
 runs/
+report/
+smoke-test/
+*-baseline/
