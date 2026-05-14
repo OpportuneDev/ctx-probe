@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from importlib.resources import files
 from pathlib import Path
 
 import click
@@ -7,6 +8,11 @@ import click
 from ctx_probe.adapters import build_adapter
 from ctx_probe.report import render
 from ctx_probe.runner import RunConfig, run
+
+
+def _bundled_sample_corpus() -> str:
+    """Resolve the path to the sample corpus bundled with the package."""
+    return str(files("ctx_probe").joinpath("data/sample_corpus"))
 
 
 def _parse_floats(ctx, param, value: str) -> list[float]:
@@ -151,6 +157,60 @@ def run_cmd(
 
 
 main.add_command(run_cmd, name="run")
+
+
+@main.command(name="demo")
+@click.option(
+    "--model",
+    default="claude-sonnet-4-6",
+    show_default=True,
+    help="Model to test against.",
+)
+@click.option(
+    "--out",
+    "out_dir",
+    default="./demo-run",
+    show_default=True,
+    type=click.Path(),
+    help="Output directory for the demo report.",
+)
+def demo_cmd(model, out_dir):
+    """Run a quick demo against the bundled sample corpus (under 1 cent on Sonnet).
+
+    Verifies your install and API key work end-to-end. Produces a small report
+    with one data point. Once this succeeds, point `ctx-probe run` at your own
+    documents.
+    """
+    corpus_path = _bundled_sample_corpus()
+    cfg = RunConfig(
+        model=model,
+        corpus_path=corpus_path,
+        out_dir=str(out_dir),
+        target_tokens=5000,
+        depths=[0.5],
+        needle_counts=[],
+        samples_per_depth=1,
+        seed=42,
+        run_niah=True,
+        run_multi_needle=False,
+    )
+
+    adapter = build_adapter(model)
+    click.echo(f"→ Demo: {adapter.name} against bundled sample corpus (~5K tokens, 1 call)")
+
+    results = run(adapter, cfg)
+    report_path = render(
+        results,
+        model=adapter.name,
+        target_tokens=cfg.target_tokens,
+        out_path=Path(out_dir) / "report.html",
+    )
+
+    n_ok = sum(1 for r in results if r.correct and not r.error)
+    click.echo(f"\n✓ {n_ok}/{len(results)} correct · report → {report_path}")
+    click.echo("\nNext step: run against your own documents:")
+    click.echo("  ctx-probe run --model <model> --corpus /path/to/your-docs ...")
+    click.echo("  See https://github.com/OpportuneDev/ctx-probe#quickstart")
 
 
 if __name__ == "__main__":

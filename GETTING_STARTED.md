@@ -65,45 +65,27 @@ You only do this once, ever.
 
 ---
 
-## Step 3 — Download ctx-probe
+## Step 3 — Install ctx-probe
 
-Paste this into the Terminal and press Enter. It downloads the tool to your home folder:
-
-```bash
-cd ~
-git clone https://github.com/OpportuneDev/ctx-probe.git
-cd ctx-probe
-```
-
-What just happened: you moved into your home folder, downloaded ctx-probe from GitHub, and moved into the ctx-probe folder. Everything from here on happens inside that folder.
-
-If you see an error saying `git: command not found`, you need to install Git first. On macOS, paste `xcode-select --install` and follow the prompt — it's a one-time setup that takes a few minutes.
-
----
-
-## Step 4 — Set up the tool
-
-This creates an isolated Python environment for ctx-probe so it doesn't conflict with anything else on your computer. Paste these one at a time:
+This installs the tool from the Python package index. Paste:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+pip install ctx-probe
 ```
 
-The last command takes about a minute. You'll see a wall of text scrolling — that's normal. When it's done you'll see "Successfully installed..." at the bottom.
+The command takes about a minute. You'll see a wall of text scrolling — that's normal. When it's done you'll see "Successfully installed..." at the bottom.
 
-Verify it worked by running:
+Verify it worked:
 
 ```bash
 ctx-probe --version
 ```
 
-You should see `ctx-probe, version 0.1.0`. If you do, you're set up. You won't need to do steps 3 and 4 again.
+You should see `ctx-probe, version 0.1.1` or higher. If you do, you're set up. **You won't need to do Step 3 again** — ctx-probe is now installed permanently.
 
 ---
 
-## Step 5 — Get your Anthropic API key
+## Step 4 — Get your Anthropic API key
 
 Go to https://console.anthropic.com/settings/keys in your browser. Sign in if you haven't. Click "Create Key", give it a name like "ctx-probe", and copy the key it shows you. **The key starts with `sk-ant-...` and is shown only once — copy it now.**
 
@@ -121,33 +103,33 @@ A note on cost: each test run costs a few cents to a few dollars, depending on h
 
 ---
 
-## Step 6 — Run a quick test (under 1 cent)
+## Step 5 — Run a quick test (under 1 cent)
 
-Before pointing at your own documents, let's verify everything works using sample documents that come with the tool. Paste this:
+Before pointing at your own documents, let's verify everything works. Paste this single command:
 
 ```bash
-ctx-probe run --model claude-sonnet-4-6 --corpus examples/sample_corpus --context-length 5000 --depths 50 --samples 1 --needles "" --out ./test-run
+ctx-probe demo
 ```
 
-It should take 5-10 seconds. When it finishes you'll see a message like:
+It should take 5–10 seconds. When it finishes you'll see a message like:
 
 ```
-✓ 1/1 correct · report → test-run/report.html
+✓ 1/1 correct · report → demo-run/report.html
 ```
 
 If you see that, **everything is working.** Open the report by pasting:
 
 ```bash
-open ./test-run/report.html
+open ./demo-run/report.html
 ```
 
-A chart should appear in your browser. The chart will be boring (one data point) — that's expected. The point is that the tool ran and produced an output.
+A chart should appear in your browser. The chart will be simple (one data point) — that's expected. The point is that the tool ran and produced an output.
 
 If something went wrong, scroll to the "Common errors" section at the end of this guide.
 
 ---
 
-## Step 7 — Run it on your own documents
+## Step 6 — Run it on your own documents
 
 Now the real measurement. Put the documents you want to test in any folder on your computer. They should be `.txt` or `.md` files. Note down the path to that folder — e.g. `/Users/yourname/Documents/my-clinical-standards`.
 
@@ -195,7 +177,7 @@ open ./my-report/report.html
 
 ---
 
-## Step 8 — How to read your chart
+## Step 7 — How to read your chart
 
 The chart shows two things:
 
@@ -228,10 +210,10 @@ If you want help interpreting the chart or planning what to fix, that's exactly 
 ## Common errors
 
 **`ctx-probe: command not found`**
-The Python environment isn't active. Re-run: `cd ~/ctx-probe && source .venv/bin/activate`.
+The install didn't complete or didn't add ctx-probe to your path. Try `pip install --user ctx-probe` and re-open the Terminal.
 
 **`ANTHROPIC_API_KEY is not set` or `authentication_error`**
-You haven't set the API key in this Terminal session, or the key is wrong. Re-run the `export ANTHROPIC_API_KEY=...` line from Step 5.
+You haven't set the API key in this Terminal session, or the key is wrong. Re-run the `export ANTHROPIC_API_KEY=...` line from Step 4.
 
 **`Corpus too small`**
 The folder you pointed at has too little text to build a haystack of the requested size. Either add more documents or reduce `--context-length`.
@@ -254,10 +236,10 @@ Open an issue at https://github.com/OpportuneDev/ctx-probe/issues with the exact
 
 | What you want to do | What to paste in Terminal |
 | --- | --- |
-| Activate the environment | `cd ~/ctx-probe && source .venv/bin/activate` |
+| Install (one time) | `pip install ctx-probe` |
 | Set the API key | `export ANTHROPIC_API_KEY=sk-ant-...` |
-| Run on sample documents | `ctx-probe run --model claude-sonnet-4-6 --corpus examples/sample_corpus --context-length 5000 --depths 50 --samples 1 --needles "" --out ./test` |
-| Run on your documents | See Step 7 |
+| Run a quick smoke test | `ctx-probe demo` |
+| Run on your documents | See Step 6 |
 | See all options | `ctx-probe run --help` |
 | Open a report | `open path/to/report.html` |
 

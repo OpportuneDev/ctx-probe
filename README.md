@@ -11,10 +11,9 @@ The published benchmark numbers (MRCR, RULER, HELMET) are measured on synthetic 
 ## Install
 
 ```bash
-pip install ctx-probe                  # from PyPI (when published)
-# or, for now:
-pip install -e .                       # from a clone of this repo
+pip install ctx-probe
 export ANTHROPIC_API_KEY=sk-ant-...
+ctx-probe demo            # smoke test against bundled sample corpus (under 1 cent)
 ```
 
 > **New to the terminal?** See [`GETTING_STARTED.md`](./GETTING_STARTED.md) — a step-by-step guide that assumes no developer experience.
