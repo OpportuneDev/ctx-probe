@@ -17,6 +17,8 @@ pip install -e .                       # from a clone of this repo
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+> **New to the terminal?** See [`GETTING_STARTED.md`](./GETTING_STARTED.md) — a step-by-step guide that assumes no developer experience.
+
 ## Quickstart — three recipes
 
 ### 1. Smoke test (one call, costs a fraction of a cent)
